@@ -2,6 +2,9 @@
 
 All notable changes to `laravel-spatial` will be documented in this file
 
+## 3.2.0 - 2026-04-02
+- Laravel 13 and PHP 8.5 support added.
+
 ## 3.1.1 - 2025-06-12
 - Fixed `$distance` parameter type from `int` to `float` in `scopeWithinDistanceTo` and related methods to properly handle decimal distance values returned by `ST_Distance` function.
 
