@@ -12,7 +12,7 @@ It supports only MySQL Spatial Data Types and Functions, other RDBMS is on the r
 
 | Version | Supported Laravel Versions |
 |---------|----------------------------|
-| `3.x`   | `^11.0`, `^12.0`           |
+| `3.x`   | `^11.0`, `^12.0`, `^13.0`  |
 | `2.x`   | `^8.0, ^9.0, ^10.0`        |
 
 **Supported data types:**
