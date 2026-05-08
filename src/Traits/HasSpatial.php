@@ -51,6 +51,7 @@ trait HasSpatial
         static $columnListingCache = [];
 
         $table = $this->getTable();
+        $spatialColumns = $this->getLocationCastedAttributes();
         
         $raw = '';
 
@@ -58,7 +59,7 @@ trait HasSpatial
             ? ', \'axis-order=long-lat\''
             : '';
 
-        foreach ($this->getLocationCastedAttributes() as $column) {
+        foreach ($spatialColumns as $column) {
             $raw .= "CONCAT(ST_AsText({$table}.{$column}$wktOptions), ',', ST_SRID({$table}.{$column})) as {$column}, ";
         }
 
@@ -69,7 +70,7 @@ trait HasSpatial
         }
 
         $selects = collect($columnListingCache[$table])
-            ->diff($this->getLocationCastedAttributes())
+            ->diff($spatialColumns)
             ->map(fn($col) => "{$table}.{$col}")
             ->push(DB::raw($raw))
             ->all();
