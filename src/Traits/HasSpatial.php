@@ -7,6 +7,7 @@ namespace TarfinLabs\LaravelSpatial\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use TarfinLabs\LaravelSpatial\Casts\LocationCast;
 use TarfinLabs\LaravelSpatial\Types\Point;
 
@@ -47,6 +48,10 @@ trait HasSpatial
 
     public function newQuery(): Builder
     {
+        static $columnListingCache = [];
+
+        $table = $this->getTable();
+        
         $raw = '';
 
         $wktOptions = config('laravel-spatial.with_wkt_options', true) === true
@@ -54,12 +59,22 @@ trait HasSpatial
             : '';
 
         foreach ($this->getLocationCastedAttributes() as $column) {
-            $raw .= "CONCAT(ST_AsText({$this->getTable()}.{$column}$wktOptions), ',', ST_SRID({$this->getTable()}.{$column})) as {$column}, ";
+            $raw .= "CONCAT(ST_AsText({$table}.{$column}$wktOptions), ',', ST_SRID({$table}.{$column})) as {$column}, ";
         }
 
         $raw = substr($raw, 0, -2);
 
-        return parent::newQuery()->addSelect("{$this->getTable()}.*", DB::raw($raw));
+        if (!isset($columnListingCache[$table])) {
+            $columnListingCache[$table] = Schema::getColumnListing($table);
+        }
+
+        $selects = collect($columnListingCache[$table])
+            ->diff($this->getLocationCastedAttributes())
+            ->map(fn($col) => "{$table}.{$col}")
+            ->push(DB::raw($raw))
+            ->all();
+
+        return parent::newQuery()->select($selects);
     }
 
     public function getLocationCastedAttributes(): Collection
